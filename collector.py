@@ -1,14 +1,13 @@
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 class Collector:
-    def __init__(self, sim, epi, results_dir_path, is_save_img=True):
+    def __init__(self, sim, epi, is_save_img=True):
         self.sim = sim
         self.epi = epi
-        self.results_dir_path = results_dir_path
         self.is_save_img = is_save_img
-
-        self.reward_sim = np.zeros(self.sim)
+        self.reward_sim = np.zeros(self.epi)
 
     def reset(self):
         self.reward_epi = []
@@ -27,5 +26,5 @@ class Collector:
         figure = plt.figure(figsize=(12, 8))
         plt.plot(self.reward_sim, alpha=0.6)
         plt.xlabel('episode')
-        plt.savefig(f'reward.png')
+        plt.savefig('reward.png')
         plt.close()
