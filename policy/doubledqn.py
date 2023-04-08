@@ -6,7 +6,7 @@ import torch.nn.functional as F
 import torch.optim as optim
 
 
-class DDQN:
+class DoubleDQN:
     def __init__(self):
         self.alpha = 0.01
         self.gamma = 0.98
