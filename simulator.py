@@ -20,7 +20,7 @@ class Simulation:
             for e in tqdm(range(self.epi)):
                 state = self.env.reset()[0]
                 terminated, truncated, total_reward = False, False, 0
-                while not (terminated or truncated):
+                while not (terminated or truncated) and (total_reward < 500):
                     action = self.policy.action(state)
                     next_state, reward, terminated, truncated, info = self.env.step(action)
                     self.policy.update(state, action, reward, next_state, (terminated or truncated))
