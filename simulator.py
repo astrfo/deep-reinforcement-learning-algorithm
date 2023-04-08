@@ -1,7 +1,7 @@
 from tqdm import tqdm
-
 from policy.dqn import DQN
-from policy.ddqn import DDQN
+from policy.doubledqn import DoubleDQN
+from policy.duelingdqn import DuelingDQN
 from collector import Collector
 
 
@@ -11,7 +11,7 @@ class Simulation:
         self.epi = epi
         self.env = env
         self.collector = Collector(sim, epi)
-        self.policy = DDQN()
+        self.policy = DuelingDQN()
 
     def run(self):
         for s in range(self.sim):
