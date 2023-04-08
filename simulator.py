@@ -1,7 +1,9 @@
 from policy.dqn import DQN
+from policy.ddqn import DDQN
+
 
 def simulation(sims, epis, env):
-    policy = DQN()
+    policy = DDQN()
     for sim in range(sims):
         policy.reset()
         for epi in range(epis):
