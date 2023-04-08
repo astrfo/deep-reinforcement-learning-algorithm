@@ -1,3 +1,5 @@
+from tqdm import tqdm
+
 from policy.dqn import DQN
 from policy.ddqn import DDQN
 from collector import Collector
@@ -15,7 +17,7 @@ class Simulation:
         for s in range(self.sim):
             self.collector.reset()
             self.policy.reset()
-            for e in range(self.epi):
+            for e in tqdm(range(self.epi)):
                 state = self.env.reset()[0]
                 terminated, truncated, total_reward = False, False, 0
                 while not (terminated or truncated):
