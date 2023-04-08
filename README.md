@@ -4,6 +4,6 @@
 
 ## 使い方
 
-```
+```python
 python main.py
 ```
