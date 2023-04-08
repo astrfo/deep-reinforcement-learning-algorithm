@@ -1,5 +1,5 @@
 import gym
-from simulator import simulation
+from simulator import Simulation
 
 
 if __name__ == '__main__':
@@ -7,4 +7,5 @@ if __name__ == '__main__':
     epi = 10
     env = gym.make('CartPole-v1', render_mode='human').unwrapped
 
-    simulation(sim, epi, env)
+    simulation = Simulation(sim, epi, env)
+    simulation.run()
