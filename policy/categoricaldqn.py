@@ -24,7 +24,6 @@ class CategoricalDQN:
         self.model_target = QNet(input_size=4, hidden_size=128, output_size=2*self.n_atoms)
         self.model_target.to(self.device)
         self.optimizer = optim.Adam(self.model.parameters(), lr=self.alpha)
-        self.criterion = nn.MSELoss()
 
     def reset(self):
         self.replay_buffer.reset()
@@ -43,7 +42,7 @@ class CategoricalDQN:
         if np.random.rand() < self.epsilon:
             action = np.random.choice(2)
         else:
-            q_values = self.q_value(state) * np.linspace(self.v_min, self.v_max, self.num_atoms)
+            q_values = self.q_value(state) * np.linspace(self.v_min, self.v_max, self.n_atoms)
             action = np.random.choice(np.where(np.sum(q_values, axis=-1) == max(np.sum(q_values, axis=-1)))[0])
         return action
 
@@ -58,15 +57,29 @@ class CategoricalDQN:
         r = torch.tensor(r, dtype=torch.float32).to(self.device)
         d = torch.tensor(d, dtype=torch.float32).to(self.device)
 
-        # TODO: C51のupdate部分変更
-        q = self.model(s)
-        qa = q[np.arange(self.batch_size), a]
-        next_q_target = self.model_target(ns)
-        next_qa_target = torch.amax(next_q_target, dim=1)
-        target = r + self.gamma * next_qa_target * (1 - d)
+        z = self.model(s).view(-1, 2, self.n_atoms)
+        z_prime = self.model_target(ns).view(-1, 2, self.n_atoms)
+        q_values = z * torch.linspace(self.v_min, self.v_max, self.n_atoms)
+        na = q_values.sum(2).argmax(1).unsqueeze(1).unsqueeze(1).expand(-1, -1, self.n_atoms).long()
+        z_prime = z_prime.gather(1, na).squeeze(1)
+
+        target_z = r.unsqueeze(1) + self.gamma * z_prime * (1 - d.unsqueeze(1))
+        target_z = target_z.clamp(self.v_min, self.v_max)
+
+        b = (target_z - self.v_min) / (self.v_max - self.v_min) * (self.n_atoms - 1)
+        lower_bound = b.floor().long()
+        upper_bound = b.ceil().long()
+        lower_residue = (upper_bound.float() - b)
+        upper_residue = (b - lower_bound.float())
+
+        target_z_projected = torch.zeros(self.batch_size, self.n_atoms).to(self.device)
+        target_z_projected.scatter_add_(1, lower_bound, lower_residue)
+        target_z_projected.scatter_add_(1, upper_bound, upper_residue)
+
+        z = z.gather(2, torch.tensor(a).unsqueeze(1).unsqueeze(1).expand(-1, -1, self.n_atoms).long()).squeeze(1)
+        loss = -(target_z_projected * z.log()).sum(1).mean()
 
         self.optimizer.zero_grad()
-        loss = self.criterion(qa, target)
         loss.backward()
         self.optimizer.step()
         self.sync_model()
@@ -79,11 +92,11 @@ class CategoricalDQN:
 
 
 class QNet(nn.Module):
-    def __init__(self, input_size, hidden_size, output_size, n_atoms):
+    def __init__(self, input_size, hidden_size, output_size):
         super().__init__()
         self.fc1 = nn.Linear(input_size, hidden_size)
         self.fc2 = nn.Linear(hidden_size, hidden_size)
-        self.fc3 = nn.Linear(hidden_size, output_size*n_atoms)
+        self.fc3 = nn.Linear(hidden_size, output_size)
 
     def forward(self, x):
         x = F.relu(self.fc1(x))
