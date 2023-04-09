@@ -3,6 +3,7 @@ from policy.dqn import DQN
 from policy.doubledqn import DoubleDQN
 from policy.duelingdqn import DuelingDQN
 from policy.categoricaldqn import CategoricalDQN
+from policy.prioritizedreplaybuffer import DQN_PER
 from collector import Collector
 
 
@@ -12,7 +13,7 @@ class Simulation:
         self.epi = epi
         self.env = env
         self.collector = Collector(sim, epi)
-        self.policy = CategoricalDQN()
+        self.policy = DQN_PER()
 
     def run(self):
         for s in range(self.sim):
