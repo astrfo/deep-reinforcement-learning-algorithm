@@ -2,6 +2,7 @@ from tqdm import tqdm
 from policy.dqn import DQN
 from policy.doubledqn import DoubleDQN
 from policy.duelingdqn import DuelingDQN
+from policy.categoricaldqn import CategoricalDQN
 from collector import Collector
 
 
@@ -11,7 +12,7 @@ class Simulation:
         self.epi = epi
         self.env = env
         self.collector = Collector(sim, epi)
-        self.policy = DuelingDQN()
+        self.policy = CategoricalDQN()
 
     def run(self):
         for s in range(self.sim):
