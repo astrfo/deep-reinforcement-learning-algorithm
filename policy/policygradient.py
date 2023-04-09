@@ -43,22 +43,10 @@ class PolicyGradient:
         pi = self.model(states)
         selected_log_probs = torch.log(pi.gather(1, torch.tensor(self.actions).view(-1, 1).to(self.device)))
 
-        discounted_rewards = []
-        for t in range(len(self.rewards)):
-            Gt = 0
-            for r, step_reward in enumerate(self.rewards[t:]):
-                Gt += step_reward * (self.gamma ** r)
-            discounted_rewards.append(Gt)
-
-        discounted_rewards = torch.tensor(discounted_rewards).to(self.device)
-        discounted_rewards = (discounted_rewards - discounted_rewards.mean()) / (discounted_rewards.std() + 1e-9)
-
-        loss = []
-        for log_prob, Gt in zip(selected_log_probs, discounted_rewards):
-            loss.append(-log_prob * Gt)
+        G_tau = sum([reward * (self.gamma ** t) for t, reward in enumerate(self.rewards)])
+        loss = -(selected_log_probs * G_tau).sum()
 
         self.optimizer.zero_grad()
-        loss = torch.cat(loss).sum()
         loss.backward()
         self.optimizer.step()
 
