@@ -9,6 +9,8 @@
 - DuelingNetwork: [Dueling Network Architectures for Deep Reinforcement Learning](https://arxiv.org/abs/1511.06581)
 - CategoricalDQN(C51): [A Distributional Perspective on Reinforcement Learning](https://arxiv.org/abs/1707.06887)
 - PrioritizedExperienceReplay: [Prioritized Experience Replay](https://arxiv.org/abs/1511.05952)
+- SimplePolicyGradient: [Simple Statistical Gradient-Following Algorithms for Connectionist Reinforcement Learning](https://link.springer.com/article/10.1007/BF00992696)
+- REINFORCE: [Simple Statistical Gradient-Following Algorithms for Connectionist Reinforcement Learning](https://link.springer.com/article/10.1007/BF00992696)
 
 ## 使い方
 
