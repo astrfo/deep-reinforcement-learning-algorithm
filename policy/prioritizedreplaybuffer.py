@@ -49,7 +49,7 @@ class DQN_PER:
         if len(self.replay_buffer.memory) < self.batch_size:
             return
 
-        s, a, r, ns, d, importance = self.replay_buffer.encode()
+        s, a, r, ns, d, importance, indices = self.replay_buffer.encode()
         s = torch.tensor(s, dtype=torch.float32).to(self.device)
         ns = torch.tensor(ns, dtype=torch.float32).to(self.device)
         r = torch.tensor(r, dtype=torch.float32).to(self.device)
@@ -62,6 +62,9 @@ class DQN_PER:
         next_qa_target = torch.amax(next_q_target, dim=1)
         target = r + self.gamma * next_qa_target * (1 - d)
 
+        td_errors = np.abs(qa.to('cpu').detach().numpy() - target.to('cpu').detach().numpy())
+        self.replay_buffer.update_priorities(indices, td_errors)
+        
         self.optimizer.zero_grad()
         loss = (importance * self.criterion(qa, target)).mean()
         loss.backward()
@@ -141,7 +144,7 @@ class PrioritizedReplayBuffer(ReplayBuffer):
             rewards.append(r)
             next_states.append(ns)
             dones.append(d)
-        return np.array(states), np.array(actions), np.array(rewards), np.array(next_states), np.array(dones), np.array(importances)
+        return np.array(states), np.array(actions), np.array(rewards), np.array(next_states), np.array(dones), np.array(importances), np.array(indices)
 
     def update_priorities(self, indices, errors):
         for i, e in zip(indices, errors):
