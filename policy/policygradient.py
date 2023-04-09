@@ -1,3 +1,4 @@
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -18,6 +19,11 @@ class PolicyGradient:
         self.model.to(self.device)
         self.optimizer = optim.Adam(self.model.parameters(), lr=self.alpha)
 
+    def episode_reset(self):
+        self.states = []
+        self.actions = []
+        self.rewards = []
+
     def action(self, state):
         s = torch.tensor(state, dtype=torch.float32).to(self.device).unsqueeze(0)
         with torch.no_grad():
@@ -26,9 +32,35 @@ class PolicyGradient:
         return action
 
     def update(self, state, action, reward, next_state, done):
-        #TODO:方策勾配は終端状態に到達した際に更新されるため，配列に保存しておく必要がある
-        pass
+        self.states.append(state)
+        self.actions.append(action)
+        self.rewards.append(reward)
 
+        if not done:
+            return
+        
+        states = torch.tensor(np.array(self.states), dtype=torch.float32).to(self.device)
+        pi = self.model(states)
+        selected_log_probs = torch.log(pi.gather(1, torch.tensor(self.actions).view(-1, 1).to(self.device)))
+
+        discounted_rewards = []
+        for t in range(len(self.rewards)):
+            Gt = 0
+            for r, step_reward in enumerate(self.rewards[t:]):
+                Gt += step_reward * (self.gamma ** r)
+            discounted_rewards.append(Gt)
+
+        discounted_rewards = torch.tensor(discounted_rewards).to(self.device)
+        discounted_rewards = (discounted_rewards - discounted_rewards.mean()) / (discounted_rewards.std() + 1e-9)
+
+        loss = []
+        for log_prob, Gt in zip(selected_log_probs, discounted_rewards):
+            loss.append(-log_prob * Gt)
+
+        self.optimizer.zero_grad()
+        loss = torch.cat(loss).sum()
+        loss.backward()
+        self.optimizer.step()
 
 
 class PolicyNet(nn.Module):
