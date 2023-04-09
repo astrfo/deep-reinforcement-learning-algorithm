@@ -22,7 +22,7 @@ class PolicyGradient:
         s = torch.tensor(state, dtype=torch.float32).to(self.device).unsqueeze(0)
         with torch.no_grad():
             pi = self.model(s)
-        action = torch.multinomial(pi, num_samples=1)
+        action = torch.multinomial(pi, num_samples=1).item()
         return action
 
     def update(self, state, action, reward, next_state, done):
@@ -36,10 +36,12 @@ class PolicyNet(nn.Module):
         super().__init__()
         self.fc1 = nn.Linear(input_size, hidden_size)
         self.fc2 = nn.Linear(hidden_size, hidden_size)
+        self.fc3 = nn.Linear(hidden_size, output_size)
         self.softmax = nn.Softmax(dim=1)
 
     def forward(self, x):
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
+        x = F.relu(self.fc3(x))
         x = self.softmax(x)
         return x
