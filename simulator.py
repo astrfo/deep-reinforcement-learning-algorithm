@@ -53,15 +53,15 @@ class PGSimulation:
             self.collector.reset()
             self.policy.reset()
             for e in tqdm(range(self.epi)):
-                self.policy.episode_reset()
                 state = self.env.reset()[0]
                 terminated, truncated, total_reward = False, False, 0
                 while not (terminated or truncated) and (total_reward < 500):
-                    action = self.policy.action(state)
+                    action, prob = self.policy.action(state)
                     next_state, reward, terminated, truncated, info = self.env.step(action)
-                    self.policy.update(state, action, reward, next_state, (terminated or truncated))
+                    self.policy.add(reward, prob)
                     state = next_state
                     total_reward += reward
+                self.policy.update()
                 self.collector.collect_episode_data(total_reward)
             self.collector.save_episode_data()
         self.collector.save_simulation_data()

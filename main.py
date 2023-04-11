@@ -1,11 +1,12 @@
 import gym
-from simulator import Simulation
+from simulator import Simulation, PGSimulation
 
 
 if __name__ == '__main__':
     sim = 1
-    epi = 500
+    epi = 5000
     env = gym.make('CartPole-v1', render_mode='rgb_array').unwrapped
 
-    simulation = Simulation(sim, epi, env)
+    # simulation = Simulation(sim, epi, env)
+    simulation = PGSimulation(sim, epi, env)
     simulation.run()
