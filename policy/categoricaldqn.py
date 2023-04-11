@@ -58,8 +58,11 @@ class CategoricalDQN:
         d = torch.tensor(d, dtype=torch.float32).to(self.device)
 
         z = self.model(s).view(-1, 2, self.n_atoms)
+        z = F.softmax(z, dim=2)
+        
         z_prime = self.model_target(ns).view(-1, 2, self.n_atoms)
-        q_values = z * torch.linspace(self.v_min, self.v_max, self.n_atoms)
+        z_prime = F.softmax(z_prime, dim=2)
+        q_values = z * torch.linspace(self.v_min, self.v_max, self.n_atoms).to(self.device)
         na = q_values.sum(2).argmax(1).unsqueeze(1).unsqueeze(1).expand(-1, -1, self.n_atoms).long()
         z_prime = z_prime.gather(1, na).squeeze(1)
 
