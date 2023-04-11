@@ -7,48 +7,43 @@ import torch.optim as optim
 
 class PolicyGradient:
     def __init__(self):
-        self.alpha = 0.01
+        self.alpha = 0.0002
         self.gamma = 0.98
         self.device = torch.device('cpu')
         self.model = PolicyNet(input_size=4, hidden_size=128, output_size=2)
         self.model.to(self.device)
         self.optimizer = optim.Adam(self.model.parameters(), lr=self.alpha)
+        self.memory = []
 
     def reset(self):
         self.model = PolicyNet(input_size=4, hidden_size=128, output_size=2)
         self.model.to(self.device)
         self.optimizer = optim.Adam(self.model.parameters(), lr=self.alpha)
 
-    def episode_reset(self):
-        self.states = []
-        self.actions = []
-        self.rewards = []
-
     def action(self, state):
         s = torch.tensor(state, dtype=torch.float32).to(self.device).unsqueeze(0)
         with torch.no_grad():
-            pi = self.model(s)
-        action = torch.multinomial(pi, num_samples=1).item()
-        return action
+            prob = self.model(s).squeeze().to('cpu').detach().numpy().copy()
+        action = np.random.choice(2, p=prob)
+        return action, prob[action]
 
-    def update(self, state, action, reward, next_state, done):
-        self.states.append(state)
-        self.actions.append(action)
-        self.rewards.append(reward)
+    def add(self, reward, prob):
+        data = (reward, prob)
+        self.memory.append(data)
 
-        if not done:
-            return
+    def update(self):
+        G, loss = 0, 0
+        for r, p in reversed(self.memory):
+            G = r + self.gamma * G
         
-        states = torch.tensor(np.array(self.states), dtype=torch.float32).to(self.device)
-        pi = self.model(states)
-        selected_log_probs = torch.log(pi.gather(1, torch.tensor(self.actions).view(-1, 1).to(self.device)))
-
-        G_tau = sum([reward * (self.gamma ** t) for t, reward in enumerate(self.rewards)])
-        loss = -(selected_log_probs * G_tau).sum()
+        for r, p in self.memory:
+            loss += -np.log(p) * G
+        loss = torch.tensor(loss, dtype=torch.float32, requires_grad=True).to(self.device)
 
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
+        self.memory = []
 
 
 class PolicyNet(nn.Module):
