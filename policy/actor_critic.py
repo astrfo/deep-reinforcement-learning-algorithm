@@ -13,7 +13,7 @@ class ActorCritic:
         self.alpha_v = 0.0005
         self.gamma = 0.98
         self.model_p = PolicyNet(input_size=4, hidden_size=128, output_size=2)
-        self.model_v = ValueNet(input_size=4, hidden_size=128, output_size=2)
+        self.model_v = ValueNet(input_size=4, hidden_size=128, output_size=1)
         self.optimizer_p = optim.Adam(self.model_p.parameters(), lr=self.alpha_p)
         self.optimizer_v = optim.Adam(self.model_v.parameters(), lr=self.alpha_v)
         self.criterion = nn.MSELoss()
