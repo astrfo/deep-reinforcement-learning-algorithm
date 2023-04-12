@@ -42,8 +42,8 @@ class CategoricalDQN:
         if np.random.rand() < self.epsilon:
             action = np.random.choice(2)
         else:
-            q_values = self.q_value(state) * np.linspace(self.v_min, self.v_max, self.n_atoms)
-            action = np.random.choice(np.where(np.sum(q_values, axis=-1) == max(np.sum(q_values, axis=-1)))[0])
+            q_values = np.dot(self.q_value(state), np.linspace(self.v_min, self.v_max, self.n_atoms))
+            action = np.argmax(q_values, axis=-1)[0]
         return action
 
     def update(self, state, action, reward, next_state, done):
