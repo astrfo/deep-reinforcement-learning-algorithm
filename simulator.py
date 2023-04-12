@@ -6,6 +6,7 @@ from policy.categoricaldqn import CategoricalDQN
 from policy.prioritizedreplaybuffer import DQN_PER
 from policy.policygradient import PolicyGradient
 from policy.reinforce import REINFORCE
+from policy.actor_critic import ActorCritic
 from collector import Collector
 
 
@@ -62,6 +63,37 @@ class PGSimulation:
                     state = next_state
                     total_reward += reward
                 self.policy.update()
+                self.collector.collect_episode_data(total_reward)
+            self.collector.save_episode_data()
+        self.collector.save_simulation_data()
+        self.env.close()
+
+
+class ACSimulation:
+    """
+    Actor Criticはupdateする際にprobを含め
+    state, reward, next_state, doneが必要
+    """
+    def __init__(self, sim, epi, env):
+        self.sim = sim
+        self.epi = epi
+        self.env = env
+        self.collector = Collector(sim, epi)
+        self.policy = ActorCritic()
+
+    def run(self):
+        for s in range(self.sim):
+            self.collector.reset()
+            self.policy.reset()
+            for e in tqdm(range(self.epi)):
+                state = self.env.reset()[0]
+                terminated, truncated, total_reward = False, False, 0
+                while not (terminated or truncated) and (total_reward < 500):
+                    action, prob = self.policy.action(state)
+                    next_state, reward, terminated, truncated, info = self.env.step(action)
+                    self.policy.update(state, prob, reward, next_state, (terminated or truncated))
+                    state = next_state
+                    total_reward += reward
                 self.collector.collect_episode_data(total_reward)
             self.collector.save_episode_data()
         self.collector.save_simulation_data()
