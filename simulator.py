@@ -4,6 +4,7 @@ from policy.doubledqn import DoubleDQN
 from policy.duelingdqn import DuelingDQN
 from policy.categoricaldqn import CategoricalDQN
 from policy.prioritizedreplaybuffer import DQN_PER
+from policy.noisynet import DQN_Noisy
 from policy.policygradient import PolicyGradient
 from policy.reinforce import REINFORCE
 from policy.actor_critic import ActorCritic
@@ -16,7 +17,7 @@ class Simulation:
         self.epi = epi
         self.env = env
         self.collector = Collector(sim, epi)
-        self.policy = DQN_PER()
+        self.policy = DQN_Noisy()
 
     def run(self):
         for s in range(self.sim):
