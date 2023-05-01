@@ -13,6 +13,8 @@
 - SimplePolicyGradient: [Simple Statistical Gradient-Following Algorithms for Connectionist Reinforcement Learning](https://link.springer.com/article/10.1007/BF00992696)
 - REINFORCE: [Simple Statistical Gradient-Following Algorithms for Connectionist Reinforcement Learning](https://link.springer.com/article/10.1007/BF00992696)
 - Actor-Critic: [Witten(1977); Barto, Sutton, Anderson(1983); Sutton(1984)](https://web.stanford.edu/class/psych209/Readings/SuttonBartoIPRLBook2ndEd.pdf)
+- RandomNetworkDistillation(RND): [Exploration by Random Network Distillation](https://arxiv.org/abs/1810.12894)
+- GORILA: [Massively Parallel Methods for Deep Reinforcement Learning](https://arxiv.org/abs/1507.04296)
 
 ## 使用方法
 
