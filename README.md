@@ -25,6 +25,7 @@ python main.py
 
 `simulator.py`の`self.policy`に使用したいアルゴリズムのクラスを定義．  
 ただし，`PolicyGradient`と`REINFORCE`は`PGSimulation`クラスを使用し，`ActorCritic`は`ACSimulation`クラスを使用してください．(`main.py`も適宜変更してください)
+
 ```python
 def __init__(self, sim, epi, env):
     ...
