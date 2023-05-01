@@ -15,6 +15,7 @@
 - Actor-Critic: [Witten(1977); Barto, Sutton, Anderson(1983); Sutton(1984)](https://web.stanford.edu/class/psych209/Readings/SuttonBartoIPRLBook2ndEd.pdf)
 
 ## 使用方法
+
 ```bash
 pip install -r requirements.txt
 python main.py
