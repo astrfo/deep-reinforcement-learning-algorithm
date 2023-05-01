@@ -76,6 +76,7 @@ class DQN_RND:
         loss.backward()
         self.optimizer.step()
         self.sync_model()
+        self.update_rnd(s)
 
     def sync_model(self):
         with torch.no_grad():
@@ -89,8 +90,12 @@ class DQN_RND:
             intrinsic_reward = torch.mean((rnd_predict - rnd_target) ** 2).item()
             return intrinsic_reward
 
-    def update_rnd(self):
-        pass
+    def update_rnd(self, ss):
+        rnd_predict, rnd_target = self.rnd_model(ss)
+        self.rnd_optimizer.zero_grad()
+        rnd_loss = self.rnd_criterion(rnd_predict, rnd_target)
+        rnd_loss.backward()
+        self.rnd_optimizer.step()
 
 
 class QNet(nn.Module):
