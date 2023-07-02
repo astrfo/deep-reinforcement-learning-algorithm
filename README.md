@@ -1,4 +1,4 @@
-# deep-reinforcement-learning-study
+# deep-reinforcement-learning-algorithm
 
 深層強化学習アルゴリズムの実装
 
